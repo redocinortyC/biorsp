@@ -1,0 +1,13 @@
+hcl:
+  url: https://datasets.cellxgene.cziscience.com/ae0c62a1-a30f-4033-97d2-0edb2e146c53.h5ad
+  filename: hcl.h5ad
+kpmp:
+  sn:
+    url: https://datasets.cellxgene.cziscience.com/7d8af09a-2f96-49f9-a473-f561a332f25d.h5ad
+    filename: kpmp_sn.h5ad
+  sc:
+    url: https://datasets.cellxgene.cziscience.com/f5b6d620-76df-45c5-9524-e5631be0e44a.h5ad
+    filename: kpmp_sc.h5ad
+  integrated:
+    url: https://datasets.cellxgene.cziscience.com/5774ef6a-4082-48f6-a692-674637671aa5.h5ad
+    filename: kpmp_integrated.h5ad
