@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spatialrsp"
+version = "0.1.0"
+description = "Python toolkit for quantifying spatial signal patterns in 2D embeddings of high-dimensional data."
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "Apache-2.0" }
+
+authors = [
+    { name = "Zeyu Yao", email = "cytronicoder@gmail.com" },
+    { name = "Jake Y. Chen", email = "jakechen@uab.edu" },
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "anndata>=0.11.0",
+    "scanpy>=1.11.0",
+    "scipy>=1.10.0",
+    "numpy>=1.23.0",
+    "pandas>=2.0.0",
+    "requests>=2.32.0",
+    "urllib3>=2.4.0",
+    "tqdm>=4.65.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "flake8", "isort"]
+
+[project.urls]
+Homepage = "https://github.com/cytronicoder/spatialrsp"
+Source = "https://github.com/cytronicoder/spatialrsp"
+"Issue Tracker" = "https://github.com/cytronicoder/spatialrsp/issues"
+
+[tool.setuptools.packages.find]
+include = ["spatialrsp"]
