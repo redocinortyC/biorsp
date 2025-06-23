@@ -31,7 +31,7 @@ def compute_rsp(
         scanning_range (np.ndarray): List of center angles to scan over.
         mode (str): Either "absolute" or "relative".
         expected_model (str): 'random' for uniform-circle null, 'local' for background-adapted null.
-        normalize (bool): If True, normalize the output areas bPy the background RSR.
+        normalize (bool): If True, normalize the output areas by the background RSR.
 
     Returns:
         tuple: When single feature provided:
