@@ -1,0 +1,18 @@
+name: spatialrsp
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - scipy
+  - scikit-learn
+  - pandas
+  - anndata
+  - scanpy
+  - tqdm
+  - pyyaml
+  - requests
+  - urllib3
+  - pip
+  - pip:
+      - -e .

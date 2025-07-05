@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spatialrsp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python toolkit for quantifying spatial signal patterns in 2D embeddings of high-dimensional data."
 readme = "README.md"
 requires-python = ">=3.7"
@@ -31,19 +31,20 @@ classifiers = [
 ]
 
 dependencies = [
-    "anndata>=0.11.0",
-    "scanpy>=1.11.0",
-    "scipy>=1.10.0",
-    "numpy>=1.23.0",
-    "pandas>=2.0.0",
-    "requests>=2.32.0",
-    "urllib3>=2.4.0",
-    "tqdm>=4.65.0",
-    "pyyaml>=6.0.0",
+    "anndata",
+    "scanpy",
+    "scipy",
+    "scikit-learn",
+    "numpy",
+    "pandas",
+    "requests",
+    "urllib3",
+    "tqdm",
+    "pyyaml",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "black", "flake8", "isort"]
+dev = ["ipykernel", "pytest", "black", "flake8", "isort"]
 
 [project.urls]
 Homepage = "https://github.com/cytronicoder/spatialrsp"

@@ -4,7 +4,7 @@ Compute angular area RSRs for foreground and background angles.
 
 from typing import Union, Sequence, Tuple, List
 import numpy as np
-from .helpers import compute_rsr
+from .helpers import compute_rsr, compute_RMSD
 
 
 def compute_rsp(
@@ -55,11 +55,7 @@ def compute_rsp(
     coverages = [len(theta_fg) / len(theta_bg) for theta_fg in theta_fgs]
 
     fg_curves = [np.zeros(len(scanning_range)) for _ in range(num_features)]
-    exp_fg_curves = (
-        [np.zeros(len(scanning_range)) for _ in range(num_features)]
-        if mode == "absolute"
-        else None
-    )
+    exp_fg_curves = [np.zeros(len(scanning_range)) for _ in range(num_features)]
     bg_curve = np.zeros(len(scanning_range))
 
     for i, center in enumerate(scanning_range):
@@ -68,31 +64,94 @@ def compute_rsp(
             center,
             scanning_window,
             bins,
-            1.0,  # coverage ignored in relative mode
-            "relative",
         )
-        bg_curve[i] = 1.0 if normalize else bg_rsr
+        bg_curve[i] = bg_rsr / bg_rsr if normalize else bg_rsr
 
         for j, theta_fg in enumerate(theta_fgs):
-            fg_rsr = compute_rsr(
-                theta_fg, center, scanning_window, bins, coverages[j], mode
-            )
-            fg_curves[j][i] = (fg_rsr / bg_rsr) if normalize else fg_rsr
+            fg_rsr = compute_rsr(theta_fg, center, scanning_window, bins)
+            if expected_model == "random":
+                M = int(len(theta_bg) * coverages[j])
+                theta_uniform = np.random.default_rng().uniform(-np.pi, np.pi, size=M)
+                exp_rsr = compute_rsr(theta_uniform, center, scanning_window, bins)
+            else:  # local
+                exp_rsr = bg_rsr * coverages[j]
 
-            if mode == "absolute" and exp_fg_curves is not None:
-                if expected_model == "random":
-                    raw_exp = np.sqrt(coverages[j] * (scanning_window / 2))
-                else:  # 'local'
-                    raw_exp = np.sqrt(coverages[j]) * bg_rsr
-                exp_fg_curves[j][i] = (raw_exp / bg_rsr) if normalize else raw_exp
+            fg_val = fg_rsr / bg_rsr if normalize else fg_rsr
+            exp_val = exp_rsr / bg_rsr if normalize else exp_rsr
+
+            fg_curves[j][i] = fg_val
+            exp_fg_curves[j][i] = exp_val
 
     if mode == "absolute":
         if single_feature:
             return fg_curves[0], exp_fg_curves[0], bg_curve
         else:
             return fg_curves, exp_fg_curves, bg_curve
-    else:
+    elif mode == "relative":
+        rel_curves = []
+        for fg_curve, exp_curve in zip(fg_curves, exp_fg_curves):
+            with np.errstate(divide="ignore", invalid="ignore"):
+                rel_curve = (fg_curve + 1e-12) / (exp_curve + 1e-12)
+            rel_curves.append(rel_curve)
         if single_feature:
-            return fg_curves[0], bg_curve
+            return rel_curves[0], bg_curve
         else:
-            return fg_curves, bg_curve
+            return rel_curves, bg_curve
+    else:
+        raise ValueError(f"Unknown mode: {mode}. Use 'absolute' or 'relative'.")
+
+
+def compute_RMSD_with_permutation(
+    theta_fg: np.ndarray,
+    theta_bg: np.ndarray,
+    scanning_window: float,
+    resolution: int,
+    scanning_range: np.ndarray,
+    mode: str = "absolute",
+    n_perm: int = 1000,
+) -> dict:
+    """
+    Compute observed RMSD between fg vs reference curve and p-value by permuting foreground labels.
+    """
+    # 1) compute observed curves
+    if mode == "absolute":
+        fg_obs, exp_obs, bg = compute_rsp(
+            theta_fg, theta_bg, scanning_window, resolution, scanning_range, mode=mode
+        )
+        ref = exp_obs
+    else:
+        fg_obs, bg = compute_rsp(
+            theta_fg, theta_bg, scanning_window, resolution, scanning_range, mode=mode
+        )
+        ref = bg
+    obs_rmsd = compute_RMSD(fg_obs, ref)
+
+    # 2) permutation null
+    perm_rmsds = []
+    M = len(theta_fg)
+    for _ in range(n_perm):
+        fg_perm = np.random.choice(theta_bg, size=M, replace=False)
+        if mode == "absolute":
+            fg_p, _, _ = compute_rsp(
+                fg_perm,
+                theta_bg,
+                scanning_window,
+                resolution,
+                scanning_range,
+                mode=mode,
+            )
+            perm_ref = exp_obs
+        else:
+            fg_p, _ = compute_rsp(
+                fg_perm,
+                theta_bg,
+                scanning_window,
+                resolution,
+                scanning_range,
+                mode=mode,
+            )
+            perm_ref = bg
+        perm_rmsds.append(compute_RMSD(fg_p, perm_ref))
+    perm_rmsds = np.array(perm_rmsds)
+    p_val = float(np.mean(perm_rmsds >= obs_rmsd))
+    return {"RMSD": obs_rmsd, "p_value": p_val}
