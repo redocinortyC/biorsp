@@ -47,18 +47,17 @@ def compute_A2(
     bg_curve: np.ndarray,
 ) -> float:
     """
-    Compute the global A2 metric as the skewness of squared RSR ratios for a list of curves.
+    Compute the global A2 metric as the Gini coefficient of squared RSR ratios.
 
-    A2 > 0  : Heavy right-tail (foreground has strong peaks)
-    A2 < 0  : Heavy left-tail (foreground is more uniform than background)
-    A2 ≈ 0  : Symmetric distribution of coverage bias
+    A2 ranges between 0 and 1: values near 0 indicate even distribution across angles;
+    values near 1 indicate concentration in few sharp peaks.
 
     Args:
         fg_curve: 1D array of RSR for the feature foregrounds.
         bg_curve: 1D array of RSR for the background.
 
     Returns:
-        A2_scores: A list of the skewness of the squared RSR ratios.
+        Gini coefficient of the squared RSR ratios.
     """
 
     if fg_curve.shape != bg_curve.shape:
@@ -66,19 +65,19 @@ def compute_A2(
     if len(fg_curve) == 0:
         raise ValueError("Input curves cannot be empty")
 
-    # squared‐ratio
+    # squared‐ratio enrichment values
     ratios = (fg_curve**2) / (bg_curve**2)
     ratios = np.maximum(ratios, np.finfo(float).tiny)
 
-    # central moments
-    mu = np.mean(ratios)
-    sigma = np.std(ratios)
-    if sigma == 0:
-        skew = 0.0
-    else:
-        # skewness = E[(X – μ)^3] / σ^3
-        skew = np.mean((ratios - mu) ** 3) / (sigma**3)
-    return float(skew)
+    # sort enrichment values in non-decreasing order
+    sorted_ratios = np.sort(ratios)
+    N = sorted_ratios.size
+    # compute Gini coefficient: sum_{i=1}^N (2i - N - 1) * r_i / (N * sum(r))
+    indices = np.arange(1, N + 1)
+    numerator = np.sum((2 * indices - N - 1) * sorted_ratios)
+    denominator = N * np.sum(sorted_ratios)
+    gini = numerator / denominator if denominator != 0 else 0.0
+    return float(gini)
 
 
 # def compute_A1_with_statistics(
