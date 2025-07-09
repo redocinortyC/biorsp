@@ -3,7 +3,7 @@ metrics against traditional cluster-based differential expression.
 
 This script generates a synthetic 2D embedding of single cells with
 four directional gene expression patterns. It computes directional
-metrics A1/A2 using the SpatialRSP package and compares these metrics
+metrics A1/A2 using the biorsp package and compares these metrics
 to cluster-wise differential expression rankings.
 
 Outputs include figures, correlation statistics and a CSV summary of
@@ -19,8 +19,8 @@ import seaborn as sns
 import scipy
 import scanpy as sc
 
-import spatialrsp as rsp
-from spatialrsp.utils.transform import cartesian_to_polar
+import biorsp as rsp
+from biorsp.utils.transform import cartesian_to_polar
 from importlib.metadata import version, PackageNotFoundError
 
 
@@ -29,7 +29,7 @@ from importlib.metadata import version, PackageNotFoundError
 def print_versions():
     """Print versions of major packages used in the benchmark."""
     try:
-        rsp_ver = version("spatialrsp")
+        rsp_ver = version("biorsp")
     except PackageNotFoundError:
         rsp_ver = "unknown"
 
@@ -40,7 +40,7 @@ def print_versions():
         "seaborn": sns.__version__,
         "scipy": scipy.__version__,
         "scanpy": sc.__version__,
-        "spatialrsp": rsp_ver,
+        "biorsp": rsp_ver,
     }
     print("Package versions:")
     for k, v in versions.items():

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Hematopoietic Regulators in the Human Cell Landscape.
 
-This script demonstrates a SpatialRSP workflow on the Human Cell Landscape
+This script demonstrates a biorsp workflow on the Human Cell Landscape
 (HCL) dataset. It filters fetal hematopoietic cells, computes Radar Scanning
-Plot metrics for highly variable genes and classifies them into SpatialRSP
+Plot metrics for highly variable genes and classifies them into biorsp
 archetypes.
 """
 
@@ -15,9 +15,9 @@ import pandas as pd
 import scanpy as sc
 import matplotlib.pyplot as plt
 
-from spatialrsp.spatial import compute_rsp, compute_A1, compute_A2
-from spatialrsp.spatial.helpers import adjust_pvalues
-from spatialrsp.utils.transform import cartesian_to_polar
+from biorsp.rsp import compute_rsp, compute_A1, compute_A2
+from biorsp.rsp.helpers import adjust_pvalues
+from biorsp.utils.transform import cartesian_to_polar
 
 
 # ---------------------------------------------------------------------
@@ -134,7 +134,7 @@ def compute_rsp_metrics(adata: sc.AnnData, n_perm: int = 1000, polar_key: str = 
 
 
 def classify_archetypes(df: pd.DataFrame, alpha: float = 0.05) -> tuple[float, pd.DataFrame]:
-    """Assign SpatialRSP archetypes to genes."""
+    """Assign biorsp archetypes to genes."""
     sig = df[df["qval_A1"] < alpha]
     tau = knee_threshold(sig["A2"].values)
     labels = []
@@ -150,13 +150,13 @@ def classify_archetypes(df: pd.DataFrame, alpha: float = 0.05) -> tuple[float, p
             labels.append("III")
         else:
             labels.append("IV")
-    df["spatialrsp_archetype"] = labels
+    df["biorsp_archetype"] = labels
     return tau, df
 
 
 def plot_top_gene(adata: sc.AnnData, df: pd.DataFrame, origin: np.ndarray, outfile: str) -> str:
     """Plot UMAP colored by the top Archetype I gene."""
-    arc1 = df[df["spatialrsp_archetype"] == "I"]
+    arc1 = df[df["biorsp_archetype"] == "I"]
     if arc1.empty:
         raise ValueError("No Archetype I genes detected")
     top_gene = arc1.sort_values("A1", ascending=False).index[0]
@@ -175,7 +175,7 @@ def plot_top_gene(adata: sc.AnnData, df: pd.DataFrame, origin: np.ndarray, outfi
 # ---------------------------------------------------------------------
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="SpatialRSP HCL case study")
+    parser = argparse.ArgumentParser(description="biorsp HCL case study")
     parser.add_argument("input", help="Path to HCL h5ad file")
     parser.add_argument("--lineage-col", default="lineage", help="Obs column with lineage annotations")
     parser.add_argument("--lineage-label", default="fetal hematopoietic", help="Value selecting fetal hematopoietic cells")
@@ -199,11 +199,11 @@ def main(argv: list[str] | None = None) -> None:
     adata.var.loc[metrics.index, "A2"] = metrics["A2"]
     adata.var.loc[metrics.index, "qval_A1"] = metrics["qval_A1"]
     adata.var.loc[metrics.index, "qval_A2"] = metrics["qval_A2"]
-    adata.var.loc[metrics.index, "spatialrsp_archetype"] = metrics["spatialrsp_archetype"]
+    adata.var.loc[metrics.index, "biorsp_archetype"] = metrics["biorsp_archetype"]
 
     top_gene = plot_top_gene(adata, metrics, origin, args.output_image)
 
-    summary = metrics.loc[metrics["spatialrsp_archetype"] == "I", ["A1", "A2", "qval_A1", "qval_A2"]].sort_values("A1", ascending=False)
+    summary = metrics.loc[metrics["biorsp_archetype"] == "I", ["A1", "A2", "qval_A1", "qval_A2"]].sort_values("A1", ascending=False)
     print("Top Archetype I genes:")
     print(summary.head(10))
 

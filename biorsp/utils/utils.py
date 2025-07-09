@@ -1,5 +1,5 @@
 """
-Misc. functions for SpatialRSP.
+Misc. functions for biorsp.
 """
 
 from typing import Optional

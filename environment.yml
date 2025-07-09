@@ -1,4 +1,4 @@
-name: spatialrsp
+name: biorsp
 channels:
   - conda-forge
 dependencies:

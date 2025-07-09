@@ -22,7 +22,7 @@ REGISTRY_PATH = Path(__file__).parent / "data/datasets.yml"
 with open(REGISTRY_PATH, encoding="utf-8") as f:
     DATASETS = yaml.safe_load(f)
 
-DATA_DIR = Path(os.getenv("SPATIALRSP_DATA_DIR", "data"))
+DATA_DIR = Path(os.getenv("biorsp_DATA_DIR", "data"))
 
 
 def _make_session():
