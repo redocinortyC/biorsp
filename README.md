@@ -1,4 +1,6 @@
-### How to test SpatialRSP
+# BioRSP
+
+### How to test BioRSP
 
 1. Create a virtual environment. You can use `conda` or `venv`. Here is how to do it with `venv`:
 
